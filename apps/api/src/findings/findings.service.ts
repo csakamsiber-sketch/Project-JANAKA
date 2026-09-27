@@ -202,7 +202,7 @@ export class FindingsService {
         }),
       ]);
 
-      const severitySummary = severityCounts.reduce<Record<string, number>>((acc, row) => {
+      const severitySummary = (severityCounts as Array<{ severity?: string | null; _count: { _all?: number | null } }>).reduce<Record<string, number>>((acc, row) => {
         const normalizedSeverity = String(row.severity ?? '').toUpperCase();
         if (['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].includes(normalizedSeverity)) {
           acc[normalizedSeverity] = Number(row._count._all ?? 0);
