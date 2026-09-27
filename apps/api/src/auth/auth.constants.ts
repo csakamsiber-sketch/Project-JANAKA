@@ -1,0 +1,12 @@
+export const AUTH_COOKIE_NAME = 'janus_session';
+export const AUTH_REFRESH_COOKIE_NAME = 'janus_refresh';
+export const AUTH_CSRF_COOKIE_NAME = 'janus_csrf';
+export const AUTH_FINGERPRINT_COOKIE_NAME = 'janus_fp';
+export const AUTH_COOKIE_MAX_AGE_MS = 1000 * 60 * 15;
+export const REFRESH_COOKIE_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 7;
+export const CSRF_COOKIE_MAX_AGE_MS = REFRESH_COOKIE_MAX_AGE_MS;
+export const REFRESH_COOKIE_PATH = '/api/v1/auth/refresh';
+export const AUTH_COOKIE_SAME_SITE = 'strict';
+export const IS_SECURE_COOKIE = process.env.NODE_ENV === 'production';
+export const JWT_SECRET = process.env.JWT_SECRET ?? 'jamus-kalimasada-super-secret-change-me';
+export const FINGERPRINT_PEPPER = process.env.FINGERPRINT_PEPPER ?? JWT_SECRET;

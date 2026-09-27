@@ -1,0 +1,263 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String?
+  mustChangePassword Boolean @default(false)
+  firstName     String?
+  lastName      String?
+  role          String
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deviceFingerprintHash String?
+  sessions      Session[]
+  loginChallenges LoginChallenge[]
+  adminActionChallenges AdminActionChallenge[]
+  downgradeRequestsTarget SuperadminDowngradeRequest[] @relation("DowngradeTarget")
+  downgradeRequestsRequested SuperadminDowngradeRequest[] @relation("DowngradeRequester")
+  downgradeApprovals SuperadminDowngradeApproval[]
+  registrationRequests RegistrationRequest[]
+  passwordResetTokens PasswordResetToken[]
+  meetingsCreated MeetingSchedule[] @relation("MeetingCreator")
+  meetingsAssigned MeetingSchedule[] @relation("MeetingVerificator")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  tokenHash    String   @unique
+  refreshTokenHash String? @unique
+  csrfTokenHash String?
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+  refreshExpiresAt DateTime
+  userAgent    String?
+  ipAddress    String?
+  fingerprintHash String?
+  revoked      Boolean  @default(false)
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model LoginChallenge {
+  id              String   @id @default(uuid())
+  userId          String
+  codeHash        String
+  fingerprintHash String
+  expiresAt       DateTime
+  attempts        Int      @default(0)
+  consumed        Boolean  @default(false)
+  status          String   @default("ACTIVE")
+  temporaryTokenHash String? @unique
+  temporaryExpiresAt DateTime?
+  cooldownUntil   DateTime?
+  consumedAt      DateTime?
+  invalidatedAt   DateTime?
+  lastAttemptAt   DateTime?
+  resendCount     Int      @default(0)
+  resendAvailableAt DateTime?
+  createdAt       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, consumed, expiresAt])
+}
+
+model AdminActionChallenge {
+  id          String   @id @default(uuid())
+  actorId     String
+  targetId    String
+  action      String
+  codeHash    String
+  expiresAt   DateTime
+  attempts    Int      @default(0)
+  consumed    Boolean  @default(false)
+  resendCount Int      @default(0)
+  resendAvailableAt DateTime?
+  createdAt   DateTime @default(now())
+  actor       User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([actorId, targetId, action, consumed, expiresAt])
+}
+
+model SuperadminDowngradeRequest {
+  id             String   @id @default(uuid())
+  targetId       String
+  requestedById  String
+  requestedRole  String
+  status         String   @default("PENDING")
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+  completedAt    DateTime?
+  target         User     @relation("DowngradeTarget", fields: [targetId], references: [id], onDelete: Cascade)
+  requestedBy    User     @relation("DowngradeRequester", fields: [requestedById], references: [id], onDelete: Cascade)
+  approvals      SuperadminDowngradeApproval[]
+
+  @@index([targetId, status, expiresAt])
+}
+
+model SuperadminDowngradeApproval {
+  id          String   @id @default(uuid())
+  requestId   String
+  approverId  String
+  codeHash    String
+  expiresAt   DateTime
+  attempts    Int      @default(0)
+  consumed    Boolean  @default(false)
+  resendCount Int      @default(0)
+  resendAvailableAt DateTime?
+  approvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  request     SuperadminDowngradeRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  approver    User     @relation(fields: [approverId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, approverId])
+  @@index([approverId, consumed, expiresAt])
+}
+
+model RegistrationRequest {
+  id           String   @id @default(uuid())
+  email        String
+  firstName    String
+  lastName     String
+  role         String
+  status       String   @default("PENDING")
+  createdAt    DateTime @default(now())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Application {
+  id                    String   @id @default(uuid())
+  name                  String
+  description           String?
+  organization          String   @default("PT Kalimasada")
+  environment           String
+  language              String?
+  framework             String?
+  languageFrontend      String?
+  languageBackend       String?
+  frameworkFrontend     String?
+  frameworkBackend      String?
+  libraries             ApplicationLibrary[]
+  projectStartDate      String
+  owner                 String
+  picId                 String?
+  picName               String?
+  developerIds          String[]
+  googleSheetId         String?  @unique
+  spreadsheetLinks      Json
+  verificationDocuments Json?
+  frontendUrl           String?
+  backendUrl            String?
+  lastVerificationDate  String?
+  lastVerifier          String?
+  verificationProgress  Json?
+  status                String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  meetingSchedules      MeetingSchedule[]
+}
+
+model MeetingSchedule {
+  id            String          @id @default(uuid())
+  applicationId String
+  verificatorId String
+  createdById   String
+  startAt       DateTime
+  endAt         DateTime
+  status        String          @default("SCHEDULED")
+  purpose       String
+  meetingNotes  String?
+  timezone      String          @default("UTC")
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  application   Application     @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  verificator   User            @relation("MeetingVerificator", fields: [verificatorId], references: [id])
+  createdBy     User            @relation("MeetingCreator", fields: [createdById], references: [id])
+  results       MeetingResult[]
+
+  @@index([verificatorId, startAt])
+  @@index([applicationId, startAt])
+}
+
+model MeetingResult {
+  id              String          @id @default(uuid())
+  meetingId       String
+  phase           String
+  capturedAt      DateTime        @default(now())
+  passPoints      Int
+  needToFixPoints Int
+  waitingPoints   Int
+  uncheckPoints   Int
+  totalPoints     Int
+  progressPercent Float
+  meeting         MeetingSchedule @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@unique([meetingId, phase])
+  @@index([meetingId, capturedAt])
+}
+
+model Library {
+  id              String               @id @default(uuid())
+  libraryName     String
+  version         String
+  ecosystem       String               @default("unknown")
+  applications    ApplicationLibrary[]
+  vulnerabilities Vulnerability[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@unique([libraryName, version, ecosystem])
+}
+
+model ApplicationLibrary {
+  id            String      @id @default(uuid())
+  applicationId String
+  libraryId     String
+  layer         String      @default("backend")
+  source        String?
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  library       Library      @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([applicationId, libraryId, layer])
+  @@index([applicationId])
+  @@index([libraryId])
+}
+
+model Vulnerability {
+  id           String   @id @default(uuid())
+  libraryId    String
+  cve          String?
+  severity     String
+  summary      String
+  fixedVersion String?
+  library      Library  @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([libraryId])
+  @@index([cve])
+  @@unique([cve])
+}

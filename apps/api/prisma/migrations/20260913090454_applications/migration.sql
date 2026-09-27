@@ -1,0 +1,32 @@
+-- CreateTable
+CREATE TABLE "Application" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "organization" TEXT NOT NULL DEFAULT 'PT Kalimasada',
+    "environment" TEXT NOT NULL,
+    "language" TEXT,
+    "framework" TEXT,
+    "languageFrontend" TEXT,
+    "languageBackend" TEXT,
+    "frameworkFrontend" TEXT,
+    "frameworkBackend" TEXT,
+    "technologyStack" TEXT[],
+    "libraries" JSONB,
+    "projectStartDate" TEXT NOT NULL,
+    "owner" TEXT NOT NULL,
+    "picId" TEXT,
+    "picName" TEXT,
+    "developerIds" TEXT[],
+    "googleSheetId" TEXT,
+    "spreadsheetLinks" JSONB NOT NULL,
+    "verificationDocuments" JSONB,
+    "frontendUrl" TEXT,
+    "backendUrl" TEXT,
+    "verificationProgress" JSONB,
+    "status" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Application_pkey" PRIMARY KEY ("id")
+);

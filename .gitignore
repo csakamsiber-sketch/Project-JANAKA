@@ -1,0 +1,6 @@
+node_modules
+.env
+.env.*
+!.env.example
+*.json.key
+apps/api/g-service-config.json

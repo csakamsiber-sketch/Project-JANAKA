@@ -1,0 +1,32 @@
+{
+  "name": "jamus-kalimasada",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:web": "cross-env PORT=3110 npm run dev --workspace @janus/web",
+    "dev:api": "cross-env PORT=4110 nodemon --watch apps/api/src --ext ts,json --exec \"npm run start:dev --workspace @janus/api\"",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "build": "npm run build --workspace @janus/web && npm run build --workspace @janus/api",
+    "start:web": "cross-env PORT=3110 npm run start --workspace @janus/web",
+    "start:api": "cross-env PORT=4110 npm run start --workspace @janus/api",
+    "ensure:ports": "node scripts/ensure-port-free.js 3110 4110",
+    "start:prod": "npm run ensure:ports && npm run build && concurrently \"npm run start:api\" \"npm run start:web\"",
+    "start": "npm run ensure:ports && concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "test:api": "npm run test --workspace @janus/api -- --runInBand",
+    "lint": "npm run lint --workspace @janus/web && npm run lint --workspace @janus/api"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5",
+    "cross-env": "^10.1.0",
+    "nodemon": "^3.1.14"
+  },
+  "dependencies": {
+    "@fingerprintjs/fingerprintjs": "^5.2.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "jsonwebtoken": "^9.0.3",
+    "otplib": "^13.5.0"
+  }
+}

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "Application_googleSheetId_key" ON "Application"("googleSheetId");

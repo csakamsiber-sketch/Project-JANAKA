@@ -1,0 +1,12 @@
+export declare const AUTH_COOKIE_NAME = "janus_session";
+export declare const AUTH_REFRESH_COOKIE_NAME = "janus_refresh";
+export declare const AUTH_CSRF_COOKIE_NAME = "janus_csrf";
+export declare const AUTH_FINGERPRINT_COOKIE_NAME = "janus_fp";
+export declare const AUTH_COOKIE_MAX_AGE_MS: number;
+export declare const REFRESH_COOKIE_MAX_AGE_MS: number;
+export declare const CSRF_COOKIE_MAX_AGE_MS: number;
+export declare const REFRESH_COOKIE_PATH = "/api/v1/auth/refresh";
+export declare const AUTH_COOKIE_SAME_SITE = "strict";
+export declare const IS_SECURE_COOKIE: boolean;
+export declare const JWT_SECRET: string;
+export declare const FINGERPRINT_PEPPER: string;
