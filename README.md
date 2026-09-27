@@ -7,7 +7,7 @@ The web app exposes the API under the same public origin. The browser calls `/ap
 Create two Vercel projects from this repository:
 
 1. **Web project**: Root Directory `apps/web`, Framework Preset `Next.js`, and attach the public domain (for example, `appurl.example.com`). Set `API_PROXY_TARGET` to the backend deployment origin only, such as `https://project-janaka-api.vercel.app` (no path or trailing slash). Set it for Production and Preview. The rewrite in `apps/web/next.config.mjs` maps `/api/*` to the backend's matching `/api/*` route.
-2. **API project**: Root Directory `apps/api`. Deploy its Node server on Vercel and use its deployment origin as the upstream in `API_PROXY_TARGET`; users should access it through the web domain's `/api` path.
+2. **API project**: Root Directory `apps/api`, Framework Preset `Other`. `apps/api/vercel.json` runs the ESM bundle build so Vercel uses `server.mts` instead of auto-detecting Nest's CommonJS source entry. Use the API deployment origin as the upstream in `API_PROXY_TARGET`; users should access it through the web domain's `/api` path.
 
 The public API base is `https://appurl.example.com/api/v1`. Keep `NEXT_PUBLIC_API_URL` unset: the web client uses the relative `/api/v1` path. Configure the API project's backend secrets from `apps/api/.env.example`, and set `CORS_ALLOWED_ORIGINS` to include the public web domain. Direct browser-to-API CORS is not used for this same-origin setup.
 
