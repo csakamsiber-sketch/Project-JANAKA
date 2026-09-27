@@ -1,4 +1,4 @@
-import { createApplication } from './src/main';
+import { createApplication } from './dist/vercel/main.mjs';
 
 async function startServer() {
   const application = await createApplication();

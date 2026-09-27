@@ -1,8 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { AppModule } from './app.module';
-
-const cookiePlugin = require('@fastify/cookie') as any;
+import cookiePlugin from '@fastify/cookie';
 import { HttpExceptionFilter } from './security/http-exception.filter';
 import { RequestIdMiddleware } from './security/request-id.middleware';
 import { SecurityHeadersMiddleware } from './security/security-headers.middleware';
@@ -23,7 +22,7 @@ export async function createApplication(): Promise<NestFastifyApplication> {
 
   const logger = app.get(ErrorLoggerService);
 
-  await app.register(cookiePlugin, {
+  await app.register(cookiePlugin as any, {
     secret: process.env.COOKIE_SECRET ?? 'janus-cookie-secret',
     parseOptions: {},
   });
@@ -91,14 +90,4 @@ export async function createApplication(): Promise<NestFastifyApplication> {
 
   await app.init();
   return app;
-}
-
-async function bootstrap() {
-  const app = await createApplication();
-  const port = app.get(ConfigService).get<number>('PORT', 4000);
-  await app.listen(port, '0.0.0.0');
-}
-
-if (require.main === module) {
-  void bootstrap();
 }
