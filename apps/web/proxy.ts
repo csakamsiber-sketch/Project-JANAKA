@@ -3,15 +3,15 @@ import { NextRequest, NextResponse } from 'next/server';
 const protectedPaths = ['/dashboard', '/applications', '/cti', '/findings', '/meetings', '/my-schedule', '/user-management', '/settings'];
 const preAuthPaths = ['/', '/login'];
 const applicationAccessRoles = new Set(['SUPERADMIN', 'OVERSEER', 'VERIFICATOR']);
-const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4110/api/v1').replace(/\/api\/v1\/?$/, '');
 
 type SessionUser = { id?: string; role?: string };
 
-async function fetchMe(cookieHeader: string): Promise<SessionUser | null> {
+async function fetchMe(cookieHeader: string, requestUrl: string): Promise<SessionUser | null> {
   try {
-    const response = await fetch(`${API_ORIGIN}/api/v1/auth/me`, {
+    const response = await fetch(new URL('/api/v1/auth/me', requestUrl), {
       headers: { cookie: cookieHeader },
       cache: 'no-store',
+      signal: AbortSignal.timeout(5_000),
     });
     if (!response.ok) return null;
     const payload = (await response.json()) as { data?: SessionUser };
@@ -24,7 +24,7 @@ async function fetchMe(cookieHeader: string): Promise<SessionUser | null> {
 async function resolveSession(request: NextRequest): Promise<{ user: SessionUser | null; setCookieHeaders: string[] }> {
   const sessionCookie = request.cookies.get('janus_session');
   if (sessionCookie) {
-    const user = await fetchMe(`janus_session=${sessionCookie.value}`);
+    const user = await fetchMe(`janus_session=${sessionCookie.value}`, request.url);
     if (user) return { user, setCookieHeaders: [] };
   }
 

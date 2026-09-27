@@ -111,6 +111,7 @@ export class FindingsService {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ package: { name: packageName, ecosystem: 'npm' }, version }),
+          signal: AbortSignal.timeout(8_000),
         });
         if (response.ok) {
           const payload = await response.json() as {

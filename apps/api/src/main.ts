@@ -29,7 +29,7 @@ export async function createApplication(): Promise<NestFastifyApplication> {
   });
 
   const configService = app.get(ConfigService);
-  const allowedOrigins = (configService.get<string>('CORS_ALLOWED_ORIGINS') ?? 'http://localhost:3000,http://localhost:3110,http://127.0.0.1:3000,http://127.0.0.1:3110,https://project-janaka-web.vercel.app')
+  const allowedOrigins = (configService.get<string>('CORS_ALLOWED_ORIGINS') ?? 'http://localhost:3000,http://localhost:3110,http://127.0.0.1:3000,http://127.0.0.1:3110,https://appurl.example.com,https://project-janaka-web.vercel.app')
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);

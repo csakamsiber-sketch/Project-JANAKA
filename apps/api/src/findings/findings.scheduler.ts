@@ -10,6 +10,7 @@ export class FindingsScheduler implements OnApplicationBootstrap {
   constructor(private readonly findingsService: FindingsService, private readonly librariesService: LibrariesService) {}
 
   async onApplicationBootstrap() {
+    if (process.env.VERCEL === '1') return;
     this.scheduleNextRun();
     void this.runFindingsScan().catch((error: unknown) => {
       this.logger.error('Initial findings scan failed during startup.', error instanceof Error ? error.stack : String(error));

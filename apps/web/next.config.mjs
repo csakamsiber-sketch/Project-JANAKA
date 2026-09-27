@@ -1,7 +1,21 @@
 /** @type {import('next').NextConfig} */
+const apiProxyTarget = (process.env.API_PROXY_TARGET ?? (process.env.NODE_ENV === 'production'
+  ? 'https://project-janaka-api.vercel.app'
+  : 'http://localhost:4110')).replace(/\/+$/, '');
+
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/api/:path*',
+          destination: `${apiProxyTarget}/api/:path*`,
+        },
+      ],
+    };
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb'
