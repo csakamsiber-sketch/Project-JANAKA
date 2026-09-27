@@ -1,6 +1,9 @@
 {
   "name": "@janus/api",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "build": "prisma generate && nest build",
     "start": "node dist/main",
