@@ -13,7 +13,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { ErrorLoggerService } from './security/error-logger.service';
 
-async function bootstrap() {
+export async function createApplication(): Promise<NestFastifyApplication> {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter({
     logger: false,
     trustProxy: true,
@@ -89,8 +89,16 @@ async function bootstrap() {
     });
   });
 
-  const port = configService.get<number>('PORT', 4000);
+  await app.init();
+  return app;
+}
+
+async function bootstrap() {
+  const app = await createApplication();
+  const port = app.get(ConfigService).get<number>('PORT', 4000);
   await app.listen(port, '0.0.0.0');
 }
 
-bootstrap();
+if (require.main === module) {
+  void bootstrap();
+}
