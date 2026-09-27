@@ -4,3 +4,8 @@ node_modules
 !.env.example
 *.json.key
 apps/api/g-service-config.json
+
+# Generated build artifacts
+.next/
+apps/web/.next/
+**/.next/
