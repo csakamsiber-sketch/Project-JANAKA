@@ -2,7 +2,7 @@
   "name": "@janus/api",
   "private": true,
   "engines": {
-    "node": "22.x"
+    "node": "24.x"
   },
   "scripts": {
     "build": "prisma generate && nest build",
