@@ -530,7 +530,7 @@ export class ApplicationsService implements OnApplicationBootstrap {
     const application = await this.prisma.application.findUnique({ where: { id } });
     if (!application) throw new Error('Application not found.');
     const document = application?.verificationDocuments && Array.isArray(application.verificationDocuments)
-      ? application.verificationDocuments[0] as VerificationDocument | undefined
+      ? (application.verificationDocuments[0] as unknown as VerificationDocument | undefined)
       : undefined;
     if (!document) throw new Error('Application has no verification document configured.');
 

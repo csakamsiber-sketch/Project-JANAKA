@@ -24,7 +24,7 @@ export declare class ApplicationsController {
         data: string[];
         meta: {};
     };
-    get(id: string, req: FastifyRequest): Promise<import("./application.entity").ApplicationEntity | undefined>;
+    get(id: string, req: FastifyRequest): Promise<import("./application.entity").ApplicationEntity>;
     refreshVerificationProgress(id: string, req: FastifyRequest): Promise<import("./application.entity").ApplicationEntity>;
     previewVerification(body: unknown, req: FastifyRequest): Promise<{
         percent: number;
@@ -58,5 +58,5 @@ export declare class ApplicationsController {
         };
         meta: {};
     }>;
-    assignPic(id: string, body: unknown, req: FastifyRequest): Promise<import("./application.entity").ApplicationEntity | undefined>;
+    assignPic(id: string, body: unknown, req: FastifyRequest): Promise<import("./application.entity").ApplicationEntity>;
 }

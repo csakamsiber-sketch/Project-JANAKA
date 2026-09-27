@@ -167,7 +167,9 @@ export class MeetingRequestsService {
       const shuffled = [...modules].sort(() => Math.random() - 0.5).slice(0, 2 + Math.floor(Math.random() * 3));
       return [toJakartaDateString(meeting.startAt), meetingVerifier, meeting.application.name, `${((startResult?.passPoints ?? 0) / Math.max(1, startResult?.totalPoints ?? 0) * 100).toFixed(2)}%`, `${((finishResult?.passPoints ?? 0) / Math.max(1, finishResult?.totalPoints ?? 0) * 100).toFixed(2)}%`, shuffled.join(', ')];
     });
-    const applicationRows = Array.from(new Map(meetings.map((meeting) => [meeting.application.name, [meeting.application.name, meeting.application.picName ?? '', 'STAGING']])).values()).map((row, index) => [index + 1, ...row]);
+    const applicationRows = Array.from(
+      new Map(meetings.map((meeting) => [meeting.application.name, [meeting.application.name, meeting.application.picName ?? '', 'STAGING'] as [string, string, string]])).values(),
+    ).map((row: [string, string, string], index) => [index + 1, ...row] as [number, string, string, string]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['TGL', 'Verifikator', 'APP', 'PERSENTASE AWAL', 'PERSENTASE AKHIR', 'VERIFIKASI'], ...dailyRows]), 'DAILY REPORT');
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['No', 'Nama Aplikasi', 'Verifikator Utama', 'Environment'], ...applicationRows]), 'APPLICATION LIST');

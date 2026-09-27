@@ -27,8 +27,8 @@ export declare class MeetingRequestsController {
             verificator: {
                 email: string;
                 id: string;
-                firstName: string | null;
-                lastName: string | null;
+                firstName: string;
+                lastName: string;
             };
         } & {
             id: string;
@@ -61,8 +61,8 @@ export declare class MeetingRequestsController {
         verificators: {
             email: string;
             id: string;
-            firstName: string | null;
-            lastName: string | null;
+            firstName: string;
+            lastName: string;
         }[];
     }>;
     createSchedule(body: unknown, req: FastifyRequest): Promise<{
@@ -285,5 +285,5 @@ export declare class MeetingRequestsController {
     }>;
     listRequests(): import("./meeting-request.entity").MeetingRequestEntity[];
     createRequest(body: unknown, req: FastifyRequest): Promise<import("./meeting-request.entity").MeetingRequestEntity>;
-    updateRequest(id: string, body: unknown, req: FastifyRequest): Promise<import("./meeting-request.entity").MeetingRequestEntity | undefined>;
+    updateRequest(id: string, body: unknown, req: FastifyRequest): Promise<import("./meeting-request.entity").MeetingRequestEntity>;
 }

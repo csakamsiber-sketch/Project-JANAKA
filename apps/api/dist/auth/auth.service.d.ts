@@ -15,7 +15,7 @@ export declare class AuthService {
     private redisConnection?;
     private readonly emailRegex;
     private getSeedAdminEmail;
-    constructor(prisma?: PrismaService | undefined, mailService?: MailService | undefined, redisSession?: RedisSessionService | undefined);
+    constructor(prisma?: PrismaService, mailService?: MailService, redisSession?: RedisSessionService);
     private validateEmail;
     private validatePassword;
     private hashPassword;
@@ -57,8 +57,8 @@ export declare class AuthService {
         items: {
             id: string;
             email: string;
-            firstName: string | null;
-            lastName: string | null;
+            firstName: string;
+            lastName: string;
             role: string;
             isActive: boolean;
             createdAt: Date;
@@ -99,8 +99,8 @@ export declare class AuthService {
         target: {
             email: string;
             id: string;
-            firstName: string | null;
-            lastName: string | null;
+            firstName: string;
+            lastName: string;
         };
         requestedBy: string;
         requestedRole: string;

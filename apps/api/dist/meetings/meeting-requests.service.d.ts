@@ -5,7 +5,7 @@ export declare class MeetingRequestsService {
     private readonly prisma?;
     private readonly applications?;
     private readonly requests;
-    constructor(prisma?: PrismaService | undefined, applications?: ApplicationsService | undefined);
+    constructor(prisma?: PrismaService, applications?: ApplicationsService);
     createSchedule(input: {
         applicationId: string;
         verificatorId: string;
@@ -183,8 +183,8 @@ export declare class MeetingRequestsService {
             verificator: {
                 email: string;
                 id: string;
-                firstName: string | null;
-                lastName: string | null;
+                firstName: string;
+                lastName: string;
             };
         } & {
             id: string;
@@ -217,8 +217,8 @@ export declare class MeetingRequestsService {
         verificators: {
             email: string;
             id: string;
-            firstName: string | null;
-            lastName: string | null;
+            firstName: string;
+            lastName: string;
         }[];
     }>;
     startSchedule(id: string, userId: string, role: string): Promise<{

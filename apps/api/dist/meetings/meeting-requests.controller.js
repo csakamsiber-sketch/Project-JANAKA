@@ -125,7 +125,7 @@ __decorate([
     __param(3, (0, common_1.Query)('limit')),
     __param(4, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, Object]),
+    __metadata("design:paramtypes", [String, String, String, String, Object]),
     __metadata("design:returntype", Promise)
 ], MeetingRequestsController.prototype, "listSchedules", null);
 __decorate([
