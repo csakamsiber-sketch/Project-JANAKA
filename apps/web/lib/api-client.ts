@@ -1,6 +1,7 @@
 import { getDeviceFingerprint } from './fingerprint';
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4110/api/v1';
+const rawApiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4110/api/v1';
+export const API_BASE_URL = rawApiBaseUrl.replace(/\/+$/, '');
 
 function addFingerprintToBody(body: BodyInit | null | undefined, fingerprint: string): BodyInit | null | undefined {
   if (!fingerprint || typeof body !== 'string') return body;
