@@ -1,7 +1,17 @@
 /** @type {import('next').NextConfig} */
-const apiProxyTarget = (process.env.API_PROXY_TARGET ?? (process.env.NODE_ENV === 'production'
-  ? 'https://project-janaka-api.vercel.app'
-  : 'http://localhost:4110')).replace(/\/+$/, '');
+const configuredApiProxyTarget = process.env.API_PROXY_TARGET?.trim();
+const apiProxyTarget = configuredApiProxyTarget || (process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:4110');
+
+if (!apiProxyTarget) {
+  throw new Error('API_PROXY_TARGET must be set to the backend origin for production builds.');
+}
+
+const apiProxyUrl = new URL(apiProxyTarget);
+if (!['http:', 'https:'].includes(apiProxyUrl.protocol) || apiProxyUrl.pathname !== '/' || apiProxyUrl.search || apiProxyUrl.hash) {
+  throw new Error('API_PROXY_TARGET must be an HTTP(S) origin without a path, query, or fragment.');
+}
+
+const apiProxyOrigin = apiProxyUrl.origin;
 
 const nextConfig = {
   reactStrictMode: true,
@@ -11,7 +21,7 @@ const nextConfig = {
       beforeFiles: [
         {
           source: '/api/:path*',
-          destination: `${apiProxyTarget}/api/:path*`,
+          destination: `${apiProxyOrigin}/api/:path*`,
         },
       ],
     };
