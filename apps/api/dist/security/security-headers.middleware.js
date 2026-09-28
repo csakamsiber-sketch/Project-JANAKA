@@ -4,7 +4,7 @@ exports.SecurityHeadersMiddleware = SecurityHeadersMiddleware;
 const node_crypto_1 = require("node:crypto");
 function SecurityHeadersMiddleware(req, res, next) {
     const origin = typeof req.headers.origin === 'string' ? req.headers.origin : undefined;
-    const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? 'http://localhost:3000,http://localhost:3110,http://127.0.0.1:3000,http://127.0.0.1:3110').split(',').map((value) => value.trim()).filter(Boolean);
+    const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? 'http://localhost:3000,http://localhost:3110,http://127.0.0.1:3000,http://127.0.0.1:3110,https://appurl.example.com,https://project-janaka-web.vercel.app').split(',').map((value) => value.trim()).filter(Boolean);
     const nonce = (0, node_crypto_1.randomBytes)(16).toString('base64');
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');

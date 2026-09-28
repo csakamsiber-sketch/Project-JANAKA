@@ -24,6 +24,8 @@ let FindingsScheduler = FindingsScheduler_1 = class FindingsScheduler {
         this.librariesService = librariesService;
     }
     async onApplicationBootstrap() {
+        if (process.env.VERCEL === '1')
+            return;
         this.scheduleNextRun();
         void this.runFindingsScan().catch((error) => {
             this.logger.error('Initial findings scan failed during startup.', error instanceof Error ? error.stack : String(error));

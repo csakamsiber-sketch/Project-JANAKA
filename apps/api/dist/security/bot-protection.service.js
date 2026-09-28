@@ -22,11 +22,18 @@ let BotProtectionService = class BotProtectionService {
         }
         if (!token)
             throw new common_1.UnauthorizedException('Complete the bot check before signing in.');
-        const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ secret, response: token, ...(ipAddress ? { remoteip: ipAddress } : {}) }),
-        });
+        let response;
+        try {
+            response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ secret, response: token, ...(ipAddress ? { remoteip: ipAddress } : {}) }),
+                signal: AbortSignal.timeout(5_000),
+            });
+        }
+        catch {
+            throw new common_1.UnauthorizedException('Bot check could not be verified. Please retry.');
+        }
         const result = await response.json();
         if (!response.ok || !result.success)
             throw new common_1.UnauthorizedException('Bot check failed.');

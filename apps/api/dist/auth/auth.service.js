@@ -17,13 +17,14 @@ const node_crypto_1 = require("node:crypto");
 const promises_1 = require("node:dns/promises");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const common_1 = require("@nestjs/common");
-const jsonwebtoken_1 = require("jsonwebtoken");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const redis_1 = require("redis");
 const auth_constants_1 = require("./auth.constants");
 const role_permissions_1 = require("./role-permissions");
 const prisma_service_1 = require("../prisma.service");
 const mail_service_1 = require("./mail.service");
 const redis_session_service_1 = require("./redis-session.service");
+const { sign, verify } = jsonwebtoken_1.default;
 let AuthService = class AuthService {
     prisma;
     mailService;
@@ -470,7 +471,7 @@ let AuthService = class AuthService {
         return true;
     }
     buildAccessToken(user, sessionId) {
-        return (0, jsonwebtoken_1.sign)({ sub: user.id, email: user.email, role: user.role, ...(sessionId ? { jti: sessionId } : {}) }, auth_constants_1.JWT_SECRET, {
+        return sign({ sub: user.id, email: user.email, role: user.role, ...(sessionId ? { jti: sessionId } : {}) }, auth_constants_1.JWT_SECRET, {
             expiresIn: '15m',
             issuer: 'jamus-kalimasada',
             audience: 'janus-web',
@@ -728,7 +729,7 @@ let AuthService = class AuthService {
             return false;
         if (this.redisSession?.enabled) {
             try {
-                const payload = (0, jsonwebtoken_1.verify)(accessToken, auth_constants_1.JWT_SECRET, { issuer: 'jamus-kalimasada', audience: 'janus-web' });
+                const payload = verify(accessToken, auth_constants_1.JWT_SECRET, { issuer: 'jamus-kalimasada', audience: 'janus-web' });
                 const sessionId = redis_session_service_1.RedisSessionService.sessionIdFromAccessToken(payload);
                 return Boolean(sessionId && await this.redisSession.consumeCsrf(sessionId, cookieToken, headerToken, replacementToken));
             }
@@ -748,7 +749,7 @@ let AuthService = class AuthService {
     }
     isValidAccessToken(token) {
         try {
-            (0, jsonwebtoken_1.verify)(token, auth_constants_1.JWT_SECRET, { issuer: 'jamus-kalimasada', audience: 'janus-web' });
+            verify(token, auth_constants_1.JWT_SECRET, { issuer: 'jamus-kalimasada', audience: 'janus-web' });
             return true;
         }
         catch {
@@ -757,13 +758,13 @@ let AuthService = class AuthService {
     }
     async getPersistentUserBySession(accessToken) {
         try {
-            (0, jsonwebtoken_1.verify)(accessToken, auth_constants_1.JWT_SECRET, { issuer: 'jamus-kalimasada', audience: 'janus-web' });
+            verify(accessToken, auth_constants_1.JWT_SECRET, { issuer: 'jamus-kalimasada', audience: 'janus-web' });
         }
         catch {
             return undefined;
         }
         if (this.redisSession?.enabled) {
-            const payload = (0, jsonwebtoken_1.verify)(accessToken, auth_constants_1.JWT_SECRET, { issuer: 'jamus-kalimasada', audience: 'janus-web' });
+            const payload = verify(accessToken, auth_constants_1.JWT_SECRET, { issuer: 'jamus-kalimasada', audience: 'janus-web' });
             const sessionId = redis_session_service_1.RedisSessionService.sessionIdFromAccessToken(payload);
             if (!sessionId)
                 return undefined;
@@ -782,7 +783,7 @@ let AuthService = class AuthService {
     async revokePersistentSession(accessToken) {
         if (this.redisSession?.enabled) {
             try {
-                const payload = (0, jsonwebtoken_1.verify)(accessToken, auth_constants_1.JWT_SECRET, { issuer: 'jamus-kalimasada', audience: 'janus-web' });
+                const payload = verify(accessToken, auth_constants_1.JWT_SECRET, { issuer: 'jamus-kalimasada', audience: 'janus-web' });
                 const sessionId = redis_session_service_1.RedisSessionService.sessionIdFromAccessToken(payload);
                 if (sessionId)
                     await this.redisSession.revokeSession(sessionId);
@@ -942,7 +943,7 @@ let AuthService = class AuthService {
             return undefined;
         }
         try {
-            const decoded = (0, jsonwebtoken_1.verify)(token, auth_constants_1.JWT_SECRET);
+            const decoded = verify(token, auth_constants_1.JWT_SECRET);
             const user = this.users.get(decoded.email ?? '');
             if (!user) {
                 return undefined;

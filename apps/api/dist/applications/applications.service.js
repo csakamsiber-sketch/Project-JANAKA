@@ -62,6 +62,8 @@ let ApplicationsService = ApplicationsService_1 = class ApplicationsService {
         this.dependencyDetector = dependencyDetector;
     }
     async onApplicationBootstrap() {
+        if (process.env.VERCEL === '1')
+            return;
         this.scheduleNextUrlCheck();
         void this.runScheduledApplicationUrlChecks().catch((error) => {
             this.logger.error('Initial application URL check failed during startup.', error instanceof Error ? error.stack : String(error));
@@ -382,7 +384,9 @@ let ApplicationsService = ApplicationsService_1 = class ApplicationsService {
                     method: 'GET',
                     redirect: 'follow',
                     headers: { 'User-Agent': 'JANUS-Application-Scanner/1.0' },
+                    signal: AbortSignal.timeout(8_000),
                 });
+                void response.body?.cancel().catch(() => undefined);
                 return { applicationId, applicationName, url, ok: response.ok, status: response.status };
             }
             catch (error) {
@@ -657,7 +661,7 @@ let ApplicationsService = ApplicationsService_1 = class ApplicationsService {
     }
     async readPublicWorkbook(url, spreadsheetId, document, cells) {
         const exportUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=xlsx${this.extractSheetGid(url) ? `&gid=${this.extractSheetGid(url)}` : ''}`;
-        const response = await fetch(exportUrl);
+        const response = await fetch(exportUrl, { signal: AbortSignal.timeout(10_000) });
         if (!response.ok)
             throw new Error(`Google Sheets returned HTTP ${response.status}. The sheet must be shared or published for preview.`);
         const workbook = XLSX.read(Buffer.from(await response.arrayBuffer()), { type: 'buffer' });
@@ -781,7 +785,7 @@ let ApplicationsService = ApplicationsService_1 = class ApplicationsService {
     }
     async readPublicCell(spreadsheetId, sheetName, cell) {
         const endpoint = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&range=${encodeURIComponent(cell)}&tqx=out:json`;
-        const response = await fetch(endpoint);
+        const response = await fetch(endpoint, { signal: AbortSignal.timeout(10_000) });
         if (!response.ok)
             throw new Error(`Google Sheets returned HTTP ${response.status}. For restricted sheets, share the document with the configured service-account email or make it publicly readable.`);
         const raw = await response.text();
