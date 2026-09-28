@@ -1,1 +1,0 @@
-The API is served by the Node.js server entrypoint.
