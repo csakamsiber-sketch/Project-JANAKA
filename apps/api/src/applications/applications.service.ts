@@ -48,7 +48,7 @@ export class ApplicationsService implements OnApplicationBootstrap {
   constructor(private readonly prisma?: PrismaService, private readonly dependencyDetector?: DependencyDetectorService) {}
 
   async onApplicationBootstrap() {
-    if (process.env.VERCEL === '1') return;
+    if (process.env.VERCEL) return;
     this.scheduleNextUrlCheck();
     void this.runScheduledApplicationUrlChecks().catch((error: unknown) => {
       this.logger.error('Initial application URL check failed during startup.', error instanceof Error ? error.stack : String(error));
@@ -381,9 +381,7 @@ export class ApplicationsService implements OnApplicationBootstrap {
           method: 'GET',
           redirect: 'follow',
           headers: { 'User-Agent': 'JANUS-Application-Scanner/1.0' },
-          signal: AbortSignal.timeout(8_000),
         });
-        void response.body?.cancel().catch(() => undefined);
         return { applicationId, applicationName, url, ok: response.ok, status: response.status };
       } catch (error) {
         return { applicationId, applicationName, url, ok: false, status: null, error: error instanceof Error ? error.message : 'Unknown error' };
@@ -533,7 +531,7 @@ export class ApplicationsService implements OnApplicationBootstrap {
     const application = await this.prisma.application.findUnique({ where: { id } });
     if (!application) throw new Error('Application not found.');
     const document = application?.verificationDocuments && Array.isArray(application.verificationDocuments)
-      ? (application.verificationDocuments[0] as unknown as VerificationDocument | undefined)
+      ? application.verificationDocuments[0] as VerificationDocument | undefined
       : undefined;
     if (!document) throw new Error('Application has no verification document configured.');
 
@@ -682,7 +680,7 @@ export class ApplicationsService implements OnApplicationBootstrap {
 
   private async readPublicWorkbook(url: string, spreadsheetId: string, document: VerificationDocument, cells: string[]) {
     const exportUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=xlsx${this.extractSheetGid(url) ? `&gid=${this.extractSheetGid(url)}` : ''}`;
-    const response = await fetch(exportUrl, { signal: AbortSignal.timeout(10_000) });
+    const response = await fetch(exportUrl);
     if (!response.ok) throw new Error(`Google Sheets returned HTTP ${response.status}. The sheet must be shared or published for preview.`);
     const workbook = XLSX.read(Buffer.from(await response.arrayBuffer()), { type: 'buffer' });
     const firstSheetName = workbook.SheetNames[0];
@@ -813,7 +811,7 @@ export class ApplicationsService implements OnApplicationBootstrap {
 
   private async readPublicCell(spreadsheetId: string, sheetName: string, cell: string): Promise<unknown> {
     const endpoint = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&range=${encodeURIComponent(cell)}&tqx=out:json`;
-    const response = await fetch(endpoint, { signal: AbortSignal.timeout(10_000) });
+    const response = await fetch(endpoint);
     if (!response.ok) throw new Error(`Google Sheets returned HTTP ${response.status}. For restricted sheets, share the document with the configured service-account email or make it publicly readable.`);
     const raw = await response.text();
     const jsonText = raw.replace(/^.*?setResponse\(/s, '').replace(/\);?\s*$/s, '');

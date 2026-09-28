@@ -8,7 +8,7 @@ exports.AUTH_FINGERPRINT_COOKIE_NAME = 'janus_fp';
 exports.AUTH_COOKIE_MAX_AGE_MS = 1000 * 60 * 15;
 exports.REFRESH_COOKIE_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 7;
 exports.CSRF_COOKIE_MAX_AGE_MS = exports.REFRESH_COOKIE_MAX_AGE_MS;
-exports.REFRESH_COOKIE_PATH = '/api/v1/auth/refresh';
+exports.REFRESH_COOKIE_PATH = process.env.VERCEL ? '/' : '/api/v1/auth/refresh';
 exports.AUTH_COOKIE_SAME_SITE = 'strict';
 exports.IS_SECURE_COOKIE = process.env.NODE_ENV === 'production';
 exports.JWT_SECRET = process.env.JWT_SECRET ?? 'jamus-kalimasada-super-secret-change-me';

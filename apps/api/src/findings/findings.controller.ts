@@ -96,7 +96,7 @@ export class FindingsController {
   async create(@Body() body: unknown, @Req() req: FastifyRequest) {
     const user = await this.requireUser(req);
     if (!['SUPERADMIN', 'OVERSEER', 'VERIFICATOR'].includes(user.role)) throw new ForbiddenException('This role cannot create findings.');
-    const dto = FindingCreateSchema.parse(body) as any;
+    const dto = FindingCreateSchema.parse(body);
     return this.findingsService.createFinding(dto);
   }
 

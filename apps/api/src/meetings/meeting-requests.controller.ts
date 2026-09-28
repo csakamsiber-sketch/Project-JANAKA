@@ -38,7 +38,7 @@ export class MeetingRequestsController {
       verificatorId: z.string().uuid().optional(),
       page: z.coerce.number().int().min(1).default(1),
       limit: z.coerce.number().int().min(1).max(50).default(10),
-    }).parse({ period, verificatorId, page, limit }) as { period: 'today' | 'week' | 'month' | 'all'; verificatorId?: string; page: number; limit: number };
+    }).parse({ period, verificatorId, page, limit });
     return this.meetingRequestsService.listSchedules(user.id, user.role, dto);
   }
 
@@ -53,8 +53,8 @@ export class MeetingRequestsController {
   async createSchedule(@Body() body: unknown, @Req() req: FastifyRequest) {
     const user = await this.currentUser(req);
     if (!['SUPERADMIN', 'OVERSEER'].includes(user.role)) throw new ForbiddenException('Only administrators and overseers can schedule meetings.');
-    const dto = z.object({ applicationId: z.string().uuid(), verificatorId: z.string().uuid(), startAt: z.string().datetime(), endAt: z.string().datetime(), purpose: z.string().min(1).max(500), timezone: z.string().max(80).optional(), forceConflictOverride: z.boolean().optional() }).parse(body) as { applicationId: string; verificatorId: string; startAt: string; endAt: string; purpose: string; timezone?: string; forceConflictOverride?: boolean };
-    return this.meetingRequestsService.createSchedule({ ...dto, ...(dto.timezone ? { timezone: dto.timezone } : {}), createdById: user.id } as any);
+    const dto = z.object({ applicationId: z.string().uuid(), verificatorId: z.string().uuid(), startAt: z.string().datetime(), endAt: z.string().datetime(), purpose: z.string().min(1).max(500), timezone: z.string().max(80).optional(), forceConflictOverride: z.boolean().optional() }).parse(body);
+    return this.meetingRequestsService.createSchedule({ ...dto, ...(dto.timezone ? { timezone: dto.timezone } : {}), createdById: user.id });
   }
 
   @Patch('schedules/:id')
@@ -106,19 +106,8 @@ export class MeetingRequestsController {
   async createRequest(@Body() body: unknown, @Req() req: FastifyRequest) {
     const user = await this.currentUser(req);
     if (!['PIC', 'VERIFICATOR', 'SUPERADMIN', 'OVERSEER'].includes(user.role)) throw new ForbiddenException('This role cannot request meetings.');
-    const dto = MeetingRequestSchema.parse(body) as {
-      id: string;
-      applicationId: string;
-      requestedBy: string;
-      verificatorId?: string;
-      title: string;
-      agenda: string;
-      proposedStart: string;
-      proposedEnd: string;
-      status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'RESCHEDULED';
-      notes?: string;
-    };
-    return this.meetingRequestsService.createRequest(dto as any);
+    const dto = MeetingRequestSchema.parse(body);
+    return this.meetingRequestsService.createRequest(dto);
   }
 
   @Patch('requests/:id')

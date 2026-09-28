@@ -53,7 +53,7 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() body: unknown) {
-    const parsed = RegisterSchema.parse(body) as { email: string; firstName: string; lastName: string; role: 'SUPERADMIN' | 'OVERSEER' | 'VERIFICATOR' | 'PIC' };
+    const parsed = RegisterSchema.parse(body);
     let registrationRequest;
     try {
       registrationRequest = await this.authService.createRegistrationRequest(parsed);

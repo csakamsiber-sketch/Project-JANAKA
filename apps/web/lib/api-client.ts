@@ -1,6 +1,6 @@
 import { getDeviceFingerprint } from './fingerprint';
 
-export const API_BASE_URL = '/api/v1';
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? '/api/v1').replace(/\/$/, '');
 
 function addFingerprintToBody(body: BodyInit | null | undefined, fingerprint: string): BodyInit | null | undefined {
   if (!fingerprint || typeof body !== 'string') return body;
@@ -82,12 +82,9 @@ async function requestOnce(path: string, init: RequestInit, fingerprint?: string
   };
   let response: Response;
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
-      ...requestInit,
-      signal: requestInit.signal ? AbortSignal.any([requestInit.signal, AbortSignal.timeout(30_000)]) : AbortSignal.timeout(30_000),
-    });
+    response = await fetch(`${API_BASE_URL}${path}`, requestInit);
   } catch {
-    const message = 'The request timed out or the server could not be reached. Please try again.';
+    const message = 'Unable to reach the server. Check your connection and try again.';
     notifyGlobalError(message, 'NETWORK_ERROR');
     throw new ApiClientError(0, 'NETWORK_ERROR', message);
   }

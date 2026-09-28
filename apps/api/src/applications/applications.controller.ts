@@ -136,7 +136,7 @@ export class ApplicationsController {
   @Post('verification-preview')
   async previewVerification(@Body() body: unknown, @Req() req: FastifyRequest) {
     await this.currentUser(req);
-    const document = applyVerificationDocumentSettings(VerificationDocumentSchema.parse(body) as any);
+    const document = applyVerificationDocumentSettings(VerificationDocumentSchema.parse(body));
     try {
       return await this.applicationsService.previewVerificationProgress(document);
     } catch (error) {
@@ -148,8 +148,8 @@ export class ApplicationsController {
   @Post('detect-libraries')
   async detectLibraries(@Body() body: unknown, @Req() req: FastifyRequest) {
     await this.currentUser(req);
-    const parsed = z.object({ files: z.array(DependencyFileSchema).min(1).max(40) }).parse(body) as { files: Array<{ name: string; content: string; layer?: 'frontend' | 'backend' }> };
-    const libraries = this.applicationsService.detectLibraries(parsed.files as Array<{ name: string; content: string }>);
+    const parsed = z.object({ files: z.array(DependencyFileSchema).min(1).max(40) }).parse(body);
+    const libraries = this.applicationsService.detectLibraries(parsed.files);
     return { data: { detected: libraries.length > 0, libraries }, meta: {} };
   }
 

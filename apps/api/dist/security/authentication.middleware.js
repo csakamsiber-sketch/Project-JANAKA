@@ -24,7 +24,7 @@ let AuthenticationMiddleware = class AuthenticationMiddleware {
             .filter((value) => typeof value === 'string')
             .join(' ');
         const path = requestPath.split('?')[0] ?? '';
-        if (request.method === 'OPTIONS' || /\/auth\/(login|login\/resend-otp|register|forgot-password|reset-password|refresh|change-password)$/.test(path)) {
+        if (request.method === 'OPTIONS' || /\/auth\/(login|login\/resend-otp|register|forgot-password|reset-password|refresh|change-password)$/.test(path) || path.endsWith('/internal/cron')) {
             next();
             return;
         }

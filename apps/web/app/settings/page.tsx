@@ -19,32 +19,19 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!syncJob || !['queued', 'running'].includes(syncJob.status)) return;
-    let active = true;
-    let timer: number | undefined;
-    let errorReported = false;
     const poll = async () => {
       try {
         const job = await apiRequest<typeof syncJob>(`/sync/${syncJob.id}`);
-        if (!active) return;
-        errorReported = false;
         setSyncJob(job);
         if (job.status === 'completed') notifyGlobalSuccess(job.message);
         if (job.status === 'failed') notifyGlobalError(job.error ?? job.message);
-        if (['queued', 'running'].includes(job.status)) timer = window.setTimeout(() => void poll(), 2500);
       } catch (error) {
-        if (!active) return;
-        if (!errorReported) {
-          notifyGlobalError(error instanceof Error ? error.message : 'Unable to read synchronization progress.');
-          errorReported = true;
-        }
-        timer = window.setTimeout(() => void poll(), 5000);
+        notifyGlobalError(error instanceof Error ? error.message : 'Unable to read synchronization progress.');
       }
     };
+    const timer = window.setInterval(() => void poll(), 1000);
     void poll();
-    return () => {
-      active = false;
-      if (timer !== undefined) window.clearTimeout(timer);
-    };
+    return () => window.clearInterval(timer);
   }, [syncJob?.id, syncJob?.status]);
 
   async function startSync(kind: 'master-data' | 'applications' | 'findings') {

@@ -7,8 +7,8 @@ export declare class AuthController {
     constructor(authService: AuthService, botProtection: BotProtectionService);
     register(body: unknown): Promise<{
         data: {
-            registrationRequestId: any;
-            status: any;
+            registrationRequestId: string;
+            status: import("./auth.types").RegistrationRequestStatus;
         };
         meta: {};
     }>;
@@ -25,10 +25,10 @@ export declare class AuthController {
             requiresOtp: boolean;
             challengeId: string;
             temporaryAccessToken: string;
-            user?: undefined;
+            user?: never;
         };
         meta: {
-            requestId?: undefined;
+            requestId?: never;
         };
     } | {
         data: {
@@ -36,13 +36,13 @@ export declare class AuthController {
                 id: string;
                 email: string;
                 role: import("./auth.types").UserRole;
-                firstName: string;
-                lastName: string;
-                mustChangePassword: boolean;
+                firstName: string | undefined;
+                lastName: string | undefined;
+                mustChangePassword: boolean | undefined;
             };
-            requiresOtp?: undefined;
-            challengeId?: undefined;
-            temporaryAccessToken?: undefined;
+            requiresOtp?: never;
+            challengeId?: never;
+            temporaryAccessToken?: never;
         };
         meta: {
             requestId: string;
@@ -115,8 +115,8 @@ export declare class AuthController {
             items: {
                 id: string;
                 email: string;
-                firstName: string;
-                lastName: string;
+                firstName: string | null;
+                lastName: string | null;
                 role: string;
                 isActive: boolean;
                 createdAt: Date;
@@ -170,8 +170,8 @@ export declare class AuthController {
             target: {
                 email: string;
                 id: string;
-                firstName: string;
-                lastName: string;
+                firstName: string | null;
+                lastName: string | null;
             };
             requestedBy: string;
             requestedRole: string;
@@ -211,6 +211,9 @@ export declare class AuthController {
         meta: {};
     }>;
     me(req: FastifyRequest): Promise<{
+        data: null;
+        meta: {};
+    } | {
         data: {
             id: string;
             role: import("./auth.types").UserRole;

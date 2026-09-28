@@ -10,9 +10,9 @@ export class FindingsScheduler implements OnApplicationBootstrap {
   constructor(private readonly findingsService: FindingsService, private readonly librariesService: LibrariesService) {}
 
   async onApplicationBootstrap() {
-    if (process.env.VERCEL === '1') return;
+    if (process.env.VERCEL) return;
     this.scheduleNextRun();
-    void this.runFindingsScan().catch((error: unknown) => {
+    void this.runScheduledScan().catch((error: unknown) => {
       this.logger.error('Initial findings scan failed during startup.', error instanceof Error ? error.stack : String(error));
     });
   }
@@ -28,7 +28,7 @@ export class FindingsScheduler implements OnApplicationBootstrap {
 
     this.logger.log(`Next findings CVE scan scheduled for ${nextRun.toISOString()}.`);
     this.timer = setTimeout(() => {
-      void this.runFindingsScan();
+      void this.runScheduledScan();
       this.scheduleNextRun();
     }, delay);
   }
@@ -54,7 +54,7 @@ export class FindingsScheduler implements OnApplicationBootstrap {
     return dayAfter;
   }
 
-  private async runFindingsScan() {
+  async runScheduledScan() {
     const synced = await this.librariesService.syncLibraryVulnerabilities();
     this.logger.log(`Scheduled library vulnerability sync stored ${synced} records and normalized stale GHSA entries.`);
 

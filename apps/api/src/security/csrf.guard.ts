@@ -4,13 +4,7 @@ import { AUTH_CSRF_COOKIE_NAME, AUTH_COOKIE_SAME_SITE, CSRF_COOKIE_MAX_AGE_MS, I
 import { AuthService } from '../auth/auth.service';
 import { getRequestAccessToken, getRequestCookies } from '../common/request-cookies';
 import { AUTH_COOKIE_NAME } from '../auth/auth.constants';
-
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3110',
-  'http://127.0.0.1:3000',
-  'http://127.0.0.1:3110',
-];
+import { getAllowedOrigins, isAllowedRequestOrigin } from './request-origin';
 
 @Injectable()
 export class CSRFGuard {
@@ -19,8 +13,13 @@ export class CSRFGuard {
   async use(req: any, res: any, next: any) {
   const origin = typeof req.headers.origin === 'string' ? req.headers.origin : undefined;
   const referer = typeof req.headers.referer === 'string' ? req.headers.referer : undefined;
-  const isAllowedOrigin = !!origin && allowedOrigins.includes(origin);
-  const validReferer = !!referer && allowedOrigins.some((allowed) => referer.startsWith(allowed));
+  const forwardedHost = this.firstHeaderValue(req.headers['x-forwarded-host']);
+  const requestHost = forwardedHost ?? req.hostname ?? this.firstHeaderValue(req.headers.host);
+  const forwardedProtocol = this.firstHeaderValue(req.headers['x-forwarded-proto']);
+  const requestProtocol = forwardedProtocol ?? req.protocol ?? (req.raw?.socket?.encrypted ? 'https' : 'http');
+  const requestOrigin = requestHost ? `${requestProtocol.split(',')[0]}://${requestHost}` : undefined;
+  const allowedOrigins = getAllowedOrigins();
+  const isAllowedOrigin = isAllowedRequestOrigin(origin, referer, requestOrigin, allowedOrigins);
 
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
     const requestPath = [req.url, req.originalUrl, req.raw?.url, req.routerPath, req.routeOptions?.url]
@@ -46,7 +45,7 @@ export class CSRFGuard {
 
     this.setCsrfCookie(res, replacementToken);
 
-    if (origin && !isAllowedOrigin && !validReferer) {
+    if (!isAllowedOrigin) {
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Vary', 'Origin');
       res.statusCode = 403;
@@ -81,6 +80,12 @@ export class CSRFGuard {
 
   next();
 }
+
+  private firstHeaderValue(value: unknown): string | undefined {
+    if (typeof value === 'string') return value.split(',')[0]?.trim();
+    if (Array.isArray(value) && typeof value[0] === 'string') return value[0].split(',')[0]?.trim();
+    return undefined;
+  }
 
   private createToken(): string {
     return randomBytes(32).toString('hex');

@@ -5,7 +5,7 @@ export declare const AUTH_FINGERPRINT_COOKIE_NAME = "janus_fp";
 export declare const AUTH_COOKIE_MAX_AGE_MS: number;
 export declare const REFRESH_COOKIE_MAX_AGE_MS: number;
 export declare const CSRF_COOKIE_MAX_AGE_MS: number;
-export declare const REFRESH_COOKIE_PATH = "/api/v1/auth/refresh";
+export declare const REFRESH_COOKIE_PATH: string;
 export declare const AUTH_COOKIE_SAME_SITE = "strict";
 export declare const IS_SECURE_COOKIE: boolean;
 export declare const JWT_SECRET: string;

@@ -3,7 +3,7 @@ import { FindingEntity } from './finding.entity';
 export declare class FindingsService {
     private readonly prisma?;
     private readonly findings;
-    constructor(prisma?: PrismaService);
+    constructor(prisma?: PrismaService | undefined);
     private normalizeCve;
     private dedupeKey;
     private mapVulnerabilityToFinding;

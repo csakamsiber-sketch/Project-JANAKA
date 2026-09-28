@@ -21,5 +21,5 @@ export declare class FindingsController {
     }>;
     checkCve(body: unknown, req: FastifyRequest): Promise<import("./finding.entity").FindingEntity>;
     create(body: unknown, req: FastifyRequest): Promise<import("./finding.entity").FindingEntity>;
-    updateStatus(id: string, body: unknown, req: FastifyRequest): Promise<import("./finding.entity").FindingEntity>;
+    updateStatus(id: string, body: unknown, req: FastifyRequest): Promise<import("./finding.entity").FindingEntity | undefined>;
 }

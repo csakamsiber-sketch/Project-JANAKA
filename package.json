@@ -9,7 +9,7 @@
     "dev:web": "cross-env PORT=3110 npm run dev --workspace @janus/web",
     "dev:api": "cross-env PORT=4110 nodemon --watch apps/api/src --ext ts,json --exec \"npm run start:dev --workspace @janus/api\"",
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
-    "build": "npm run build --workspace @janus/web && npm run build --workspace @janus/api",
+    "build": "npm run build --workspace @janus/api && npm run build --workspace @janus/web",
     "start:web": "cross-env PORT=3110 npm run start --workspace @janus/web",
     "start:api": "cross-env PORT=4110 npm run start --workspace @janus/api",
     "ensure:ports": "node scripts/ensure-port-free.js 3110 4110",

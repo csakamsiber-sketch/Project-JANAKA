@@ -30,7 +30,7 @@ export declare class ApplicationsService implements OnApplicationBootstrap {
     private readonly logger;
     private readonly applications;
     private urlCheckTimer?;
-    constructor(prisma?: PrismaService, dependencyDetector?: DependencyDetectorService);
+    constructor(prisma?: PrismaService | undefined, dependencyDetector?: DependencyDetectorService | undefined);
     onApplicationBootstrap(): Promise<void>;
     private readonly sheetsClient?;
     private readonly driveClient?;

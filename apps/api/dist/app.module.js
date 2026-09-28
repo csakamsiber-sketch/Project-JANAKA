@@ -39,6 +39,7 @@ const sync_controller_1 = require("./sync/sync.controller");
 const sync_service_1 = require("./sync/sync.service");
 const master_data_sync_service_1 = require("./sync/master-data-sync.service");
 const error_logger_service_1 = require("./security/error-logger.service");
+const scheduled_tasks_controller_1 = require("./scheduled-tasks.controller");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(rate_limit_middleware_1.RateLimitMiddleware, csrf_guard_1.CSRFGuard, authentication_middleware_1.AuthenticationMiddleware).forRoutes({ path: '{*path}', method: common_1.RequestMethod.ALL });
@@ -63,6 +64,7 @@ exports.AppModule = AppModule = __decorate([
             findings_controller_1.FindingsController,
             libraries_controller_1.LibrariesController,
             sync_controller_1.SyncController,
+            scheduled_tasks_controller_1.ScheduledTasksController,
         ],
         providers: [
             app_service_1.AppService,

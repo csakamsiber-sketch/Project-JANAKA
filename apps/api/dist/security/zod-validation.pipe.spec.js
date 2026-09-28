@@ -1,3 +1,4 @@
+"use strict";
 jest.mock('@nestjs/common', () => ({
     Injectable: () => (target) => target,
     BadRequestException: class BadRequestException extends Error {

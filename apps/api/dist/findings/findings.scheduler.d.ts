@@ -10,5 +10,5 @@ export declare class FindingsScheduler implements OnApplicationBootstrap {
     onApplicationBootstrap(): Promise<void>;
     private scheduleNextRun;
     private getNextRunTime;
-    private runFindingsScan;
+    runScheduledScan(): Promise<void>;
 }

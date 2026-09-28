@@ -111,7 +111,6 @@ export class FindingsService {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ package: { name: packageName, ecosystem: 'npm' }, version }),
-          signal: AbortSignal.timeout(8_000),
         });
         if (response.ok) {
           const payload = await response.json() as {
@@ -203,7 +202,7 @@ export class FindingsService {
         }),
       ]);
 
-      const severitySummary = (severityCounts as Array<{ severity?: string | null; _count: { _all?: number | null } }>).reduce<Record<string, number>>((acc, row) => {
+      const severitySummary = severityCounts.reduce<Record<string, number>>((acc, row) => {
         const normalizedSeverity = String(row.severity ?? '').toUpperCase();
         if (['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].includes(normalizedSeverity)) {
           acc[normalizedSeverity] = Number(row._count._all ?? 0);

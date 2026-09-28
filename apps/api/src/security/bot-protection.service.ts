@@ -4,7 +4,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 export class BotProtectionService {
   async verify(token: string | undefined, ipAddress?: string): Promise<void> {
     const secret = process.env.TURNSTILE_SECRET_KEY;
-    const devBypass = process.env.NODE_ENV !== 'production' || process.env.TURNSTILE_DEV_BYPASS === 'true';
+    const devBypass = process.env.NODE_ENV !== 'production' && process.env.TURNSTILE_DEV_BYPASS !== 'false';
 
     if (!secret) {
       if (process.env.NODE_ENV === 'production') throw new UnauthorizedException('Bot protection is not configured.');
@@ -17,17 +17,11 @@ export class BotProtectionService {
 
     if (!token) throw new UnauthorizedException('Complete the bot check before signing in.');
 
-    let response: Response;
-    try {
-      response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ secret, response: token, ...(ipAddress ? { remoteip: ipAddress } : {}) }),
-        signal: AbortSignal.timeout(5_000),
-      });
-    } catch {
-      throw new UnauthorizedException('Bot check could not be verified. Please retry.');
-    }
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ secret, response: token, ...(ipAddress ? { remoteip: ipAddress } : {}) }),
+    });
     const result = await response.json() as { success?: boolean };
     if (!response.ok || !result.success) throw new UnauthorizedException('Bot check failed.');
   }

@@ -2,7 +2,7 @@ import { createHash, createHmac, randomBytes, randomInt, randomUUID, timingSafeE
 import { resolveMx } from 'node:dns/promises';
 import bcrypt from 'bcrypt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import jsonwebtoken from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
 import { createClient } from 'redis';
 import { AUTH_COOKIE_NAME, FINGERPRINT_PEPPER, JWT_SECRET } from './auth.constants';
 import { AuthenticatedUser, AuthSession, RegistrationRequest, ResetTokenRecord, UserRecord, UserRole } from './auth.types';
@@ -10,8 +10,6 @@ import { hasPermission } from './role-permissions';
 import { PrismaService } from '../prisma.service';
 import { MailService } from './mail.service';
 import { RedisSessionService } from './redis-session.service';
-
-const { sign, verify } = jsonwebtoken;
 
 @Injectable()
 export class AuthService {

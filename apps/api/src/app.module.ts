@@ -30,6 +30,7 @@ import { SyncController } from './sync/sync.controller';
 import { SyncService } from './sync/sync.service';
 import { MasterDataSyncService } from './sync/master-data-sync.service';
 import { ErrorLoggerService } from './security/error-logger.service';
+import { ScheduledTasksController } from './scheduled-tasks.controller';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ErrorLoggerService } from './security/error-logger.service';
     FindingsController,
     LibrariesController,
     SyncController,
+    ScheduledTasksController,
   ],
   providers: [
     AppService,

@@ -57,7 +57,6 @@ export class LibrariesService {
             package: { name: library.libraryName, ecosystem: library.ecosystem === 'npm' ? 'npm' : library.ecosystem },
             version: library.version,
           }),
-          signal: AbortSignal.timeout(8_000),
         });
 
         if (!response.ok) continue;
@@ -106,7 +105,6 @@ export class LibrariesService {
             package: { name: library.libraryName, ecosystem: library.ecosystem === 'npm' ? 'npm' : library.ecosystem },
             version: library.version,
           }),
-          signal: AbortSignal.timeout(8_000),
         });
         if (!response.ok) continue;
 
@@ -154,34 +152,25 @@ export class LibrariesService {
 
   async listVulnerabilities() {
     const libraries = await this.prisma.library.findMany({ include: { applications: { include: { application: { select: { id: true, name: true } } } } } });
-    const results = [];
-    for (let offset = 0; offset < libraries.length; offset += 8) {
-      const batch = await Promise.all(libraries.slice(offset, offset + 8).map(async (library) => {
-        try {
-          const response = await fetch('https://api.osv.dev/v1/query', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ package: { name: library.libraryName, ecosystem: library.ecosystem === 'npm' ? 'npm' : library.ecosystem }, version: library.version }),
-            signal: AbortSignal.timeout(8_000),
-          });
-          if (!response.ok) return [];
-          const payload = await response.json() as { vulns?: Array<{ id: string; summary?: string; details?: string; database_specific?: { severity?: string }; affected?: Array<{ ranges?: Array<{ events?: Array<{ fixed?: string }> }> }> }> };
-          return (payload.vulns ?? []).map((vulnerability) => ({
-            id: vulnerability.id,
-            library: library.libraryName,
-            version: library.version,
-            severity: vulnerability.database_specific?.severity ?? 'UNKNOWN',
-            summary: vulnerability.summary ?? vulnerability.details ?? 'Vulnerability reported by OSV.',
-            fixedVersion: vulnerability.affected?.flatMap((affected) => affected.ranges ?? []).flatMap((range) => range.events ?? []).map((event) => event.fixed).find(Boolean),
-            cveUrl: vulnerability.id.startsWith('CVE-') ? `https://nvd.nist.gov/vuln/detail/${vulnerability.id}` : `https://osv.dev/vulnerability/${vulnerability.id}`,
-            applications: library.applications.map((application) => application.application),
-          }));
-        } catch {
-          return [];
-        }
-      }));
-      results.push(...batch);
-    }
+    const results = await Promise.all(libraries.map(async (library) => {
+      try {
+        const response = await fetch('https://api.osv.dev/v1/query', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ package: { name: library.libraryName, ecosystem: library.ecosystem === 'npm' ? 'npm' : library.ecosystem }, version: library.version }) });
+        if (!response.ok) return [];
+        const payload = await response.json() as { vulns?: Array<{ id: string; summary?: string; details?: string; database_specific?: { severity?: string }; affected?: Array<{ ranges?: Array<{ events?: Array<{ fixed?: string }> }> }> }> };
+        return (payload.vulns ?? []).map((vulnerability) => ({
+          id: vulnerability.id,
+          library: library.libraryName,
+          version: library.version,
+          severity: vulnerability.database_specific?.severity ?? 'UNKNOWN',
+          summary: vulnerability.summary ?? vulnerability.details ?? 'Vulnerability reported by OSV.',
+          fixedVersion: vulnerability.affected?.flatMap((affected) => affected.ranges ?? []).flatMap((range) => range.events ?? []).map((event) => event.fixed).find(Boolean),
+          cveUrl: vulnerability.id.startsWith('CVE-') ? `https://nvd.nist.gov/vuln/detail/${vulnerability.id}` : `https://osv.dev/vulnerability/${vulnerability.id}`,
+          applications: library.applications.map((application) => application.application),
+        }));
+      } catch {
+        return [];
+      }
+    }));
     const findings = new Map<string, any>();
     for (const finding of results.flat()) {
       const existing = findings.get(finding.id);
